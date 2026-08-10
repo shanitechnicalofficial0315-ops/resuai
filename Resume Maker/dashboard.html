@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResuAI - Dashboard</title>
+    <!-- Authentication Guard -->
+    <script src="auth.js"></script>
+    <script>requireAuth();</script>
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CDNs for Export and Drag-and-Drop -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+</head>
+<body class="dashboard-page light-theme">
+
+    <!-- Header Navigation -->
+    <header class="dashboard-header">
+        <div class="logo-section">
+            <a href="index.html" style="text-decoration: none; display: flex; align-items: center; gap: 12px;">
+                <div class="logo-icon" style="width: 32px; height: 32px; font-size: 16px;">R</div>
+                <span class="logo-title" style="font-size: 18px;">ResuAI</span>
+            </a>
+        </div>
+        
+        <div class="user-profile-bar">
+            <button class="btn-grey-pill" onclick="openTemplateModal()" style="padding: 8px 16px; margin-right: 16px; font-size: 13px;">
+                <i class="fa-solid fa-palette"></i> Change Template
+            </button>
+            <div class="user-info">
+                <div class="user-avatar" id="dashAvatar"><i class="fa-solid fa-user"></i></div>
+                <span id="dashGreeting" style="font-weight: 600; font-size: 14px;">Welcome back!</span>
+            </div>
+            <button class="btn-danger" onclick="logoutUser()" style="padding: 8px 16px; border-radius: 50px;">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+            </button>
+        </div>
+    </header>
+
+    <main class="dashboard-main" style="padding-top: 10px;">
+        <!-- Top Toolbar -->
+        <div class="builder-toolbar" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 24px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <button class="btn-secondary" onclick="loadDemoData()" style="padding: 6px 12px; font-size: 13px;">
+                    <i class="fa-solid fa-magic"></i> Load Demo Data
+                </button>
+                <div class="ats-score" style="display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px;">
+                    <i class="fa-solid fa-chart-pie" style="color: var(--brand-blue);"></i> ATS Score: <span id="atsScoreValue" style="color: #10b981;">0%</span>
+                </div>
+                <div class="save-status" id="saveStatus" style="font-size: 12px; color: var(--text-muted);">
+                    <i class="fa-solid fa-cloud"></i> Auto-saved just now
+                </div>
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <button class="btn-secondary" onclick="shareResume()" style="padding: 6px 12px; font-size: 13px;">
+                    <i class="fa-solid fa-link"></i> Share Link
+                </button>
+                <select id="exportFormat" class="btn-secondary" style="padding: 6px 12px; font-size: 13px; border: 1px solid var(--border-color); background: white;">
+                    <option value="pdf">PDF Format</option>
+                    <option value="json">JSON Backup</option>
+                    <option value="txt">Plain Text</option>
+                </select>
+                <button class="btn-primary" onclick="exportResume()" style="padding: 6px 16px; font-size: 13px; background: var(--brand-blue); color: white; border-radius: 6px;">
+                    <i class="fa-solid fa-download"></i> Export
+                </button>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Left Side: Form Editor -->
+            <section class="card editor-card" style="padding: 24px; max-height: calc(100vh - 180px); overflow-y: auto;">
+                <h2 class="card-title" style="margin-bottom: 24px;">Resume Content</h2>
+                
+                <!-- Progress Bar -->
+                <div style="width: 100%; background: #f1f5f9; height: 6px; border-radius: 4px; margin-bottom: 24px;">
+                    <div id="builderProgress" style="width: 25%; height: 100%; background: var(--brand-blue); border-radius: 4px; transition: width 0.3s ease;"></div>
+                </div>
+
+                <form id="resumeForm">
+                    <!-- Personal Info -->
+                    <div class="editor-section" style="margin-bottom: 32px;">
+                        <h3 style="font-size: 16px; margin-bottom: 16px; display: flex; justify-content: space-between;">
+                            <span>Personal Information</span>
+                        </h3>
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="r_name" oninput="updatePreview()" placeholder="e.g. Shayan Khan">
+                        </div>
+                        <div class="form-group row-split">
+                            <div>
+                                <label>Job Title</label>
+                                <input type="text" id="r_title" oninput="updatePreview()" placeholder="e.g. Software Engineer">
+                            </div>
+                            <div>
+                                <label>Email</label>
+                                <input type="email" id="r_email" oninput="updatePreview()" placeholder="e.g. shayan@example.com">
+                            </div>
+                        </div>
+                        <div class="form-group row-split">
+                            <div>
+                                <label>Phone</label>
+                                <input type="text" id="r_phone" oninput="updatePreview()" placeholder="e.g. +1 234 567 8900">
+                            </div>
+                            <div>
+                                <label>Location</label>
+                                <input type="text" id="r_location" oninput="updatePreview()" placeholder="e.g. San Francisco, CA">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Professional Summary -->
+                    <div class="editor-section" style="margin-bottom: 32px;">
+                        <h3 style="font-size: 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+                            <span>Professional Summary</span>
+                            <button type="button" onclick="enhanceText('r_summary')" class="btn-sm" style="background: #e0e7ff; color: var(--brand-blue); border: none; cursor: pointer; border-radius: 4px; padding: 4px 8px; font-size: 11px;" title="Enhance grammar and tone with AI">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> AI Enhance
+                            </button>
+                        </h3>
+                        <div class="form-group">
+                            <textarea id="r_summary" oninput="updatePreview()" placeholder="Write a brief professional summary..." style="min-height: 100px;"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Experience -->
+                    <div class="editor-section" style="margin-bottom: 32px;">
+                        <h3 style="font-size: 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+                            <span>Experience</span>
+                            <button type="button" onclick="addExperience()" class="btn-sm" style="background: #f1f5f9; border: none; cursor: pointer; border-radius: 4px; padding: 4px 8px; font-size: 11px;">+ Add Role</button>
+                        </h3>
+                        <div id="experienceList">
+                            <!-- Drag and Drop Experience items generated here -->
+                        </div>
+                    </div>
+
+                    <!-- Education -->
+                    <div class="editor-section" style="margin-bottom: 32px;">
+                        <h3 style="font-size: 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+                            <span>Education</span>
+                            <button type="button" onclick="addEducation()" class="btn-sm" style="background: #f1f5f9; border: none; cursor: pointer; border-radius: 4px; padding: 4px 8px; font-size: 11px;">+ Add School</button>
+                        </h3>
+                        <div id="educationList">
+                            <!-- Drag and Drop Education items generated here -->
+                        </div>
+                    </div>
+
+                    <!-- Skills -->
+                    <div class="editor-section" style="margin-bottom: 32px;">
+                        <h3 style="font-size: 16px; margin-bottom: 16px;">Skills</h3>
+                        <div class="form-group">
+                            <label>Technical Skills (comma separated)</label>
+                            <input type="text" id="r_skills" oninput="updatePreview()" placeholder="e.g. JavaScript, React, Node.js">
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-muted);">* Skill level sliders and star ratings are auto-generated based on the template.</div>
+                    </div>
+                </form>
+            <!-- Right Side: Live Resume Preview -->
+            <section class="card preview-card" style="padding: 0; background: #e2e8f0; border: none; display: flex; justify-content: center; overflow-y: auto; max-height: calc(100vh - 180px);">
+                <div id="resumePreviewContainer" style="background: white; width: 210mm; min-height: 297mm; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 40px; margin: 24px; position: relative; color: var(--text-primary); font-family: 'Inter', sans-serif;">
+                    <!-- Real-time DOM representation of the resume goes here -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Template Selector Modal -->
+    <div class="template-modal" id="templateModal">
+        <div class="modal-content-wrapper">
+            <button class="modal-close-btn" onclick="closeTemplateModal()"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div class="templates-header" style="margin-bottom: 32px;">
+                <h2 style="font-size: 28px;">Select a Template</h2>
+                <p>Choose a layout style for your next document generation.</p>
+            </div>
+            
+            <div class="template-grid">
+                <!-- Templates are injected here by templates.js -->
+            </div>
+        </div>
+    </div>
+
+    <script src="builder.js"></script>
+    <script src="templates.js"></script>
+</body>
+</html>

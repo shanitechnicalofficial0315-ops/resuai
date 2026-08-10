@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResuAI Admin - Login</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="js/auth.js"></script>
+    <style>
+        .admin-login-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: #f1f5f9;
+        }
+        .admin-login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .admin-logo {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--brand-blue);
+            margin-bottom: 24px;
+        }
+        .admin-login-card input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .admin-login-card button {
+            width: 100%;
+            padding: 12px;
+            background: var(--brand-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .admin-login-card button:hover {
+            background: var(--brand-blue-hover);
+        }
+        .error-msg {
+            color: #ef4444;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-login-wrapper">
+        <div class="admin-login-card">
+            <div class="admin-logo">ResuAI Admin</div>
+            <h2 style="font-size: 20px; margin-bottom: 24px; color: var(--text-primary);">Restricted Access</h2>
+            <div class="error-msg" id="errorMsg">Invalid credentials.</div>
+            <form id="adminLoginForm">
+                <input type="email" id="adminEmail" placeholder="Admin Email" required autocomplete="username" value="shayanresumaker@gmail.com">
+                <input type="password" id="adminPassword" placeholder="Password" required autocomplete="current-password" value="shayankhan@0333">
+                <button type="submit">Authenticate</button>
+            </form>
+            <div style="margin-top: 24px; font-size: 12px; color: var(--text-muted);">
+                <a href="../index.html" style="color: var(--brand-blue); text-decoration: none;">&larr; Back to main site</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
