@@ -3,186 +3,362 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ResuAI - Dashboard</title>
-    <!-- Authentication Guard -->
-    <script src="auth.js"></script>
-    <script>requireAuth();</script>
-    
-    <link rel="stylesheet" href="style.css">
+    <title>ResuAI Admin - Dashboard</title>
+    <!-- CSS & Icons -->
+    <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- CDNs for Export and Drag-and-Drop -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <!-- Chart.js for Visual Graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Admin Dashboard Styles -->
+    <link rel="stylesheet" href="css/admin.css">
 </head>
-<body class="dashboard-page light-theme">
+<body>
 
-    <!-- Header Navigation -->
-    <header class="dashboard-header">
-        <div class="logo-section">
-            <a href="index.html" style="text-decoration: none; display: flex; align-items: center; gap: 12px;">
-                <div class="logo-icon" style="width: 32px; height: 32px; font-size: 16px;">R</div>
-                <span class="logo-title" style="font-size: 18px;">ResuAI</span>
+    <div class="admin-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-logo">
+                <i class="fa-solid fa-bolt" style="font-size: 20px;"></i> ResuAI Admin
+            </div>
+            
+            <a class="nav-link active" onclick="switchTab('dashboard', this)">
+                <i class="fa-solid fa-chart-pie" style="width: 20px;"></i> Dashboard
             </a>
-        </div>
-        
-        <div class="user-profile-bar">
-            <button class="btn-grey-pill" onclick="openTemplateModal()" style="padding: 8px 16px; margin-right: 16px; font-size: 13px;">
-                <i class="fa-solid fa-palette"></i> Change Template
-            </button>
-            <div class="user-info">
-                <div class="user-avatar" id="dashAvatar"><i class="fa-solid fa-user"></i></div>
-                <span id="dashGreeting" style="font-weight: 600; font-size: 14px;">Welcome back!</span>
-            </div>
-            <button class="btn-danger" onclick="logoutUser()" style="padding: 8px 16px; border-radius: 50px;">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
-            </button>
-        </div>
-    </header>
+            <a class="nav-link" onclick="switchTab('users', this)">
+                <i class="fa-solid fa-users" style="width: 20px;"></i> User Management
+            </a>
+            <a class="nav-link" onclick="switchTab('templates', this)">
+                <i class="fa-solid fa-palette" style="width: 20px;"></i> Templates
+            </a>
+            <a class="nav-link" onclick="switchTab('monetization', this)">
+                <i class="fa-solid fa-sack-dollar" style="width: 20px;"></i> Monetization & Ads
+            </a>
+            <a class="nav-link" onclick="switchTab('ai-settings', this)">
+                <i class="fa-solid fa-robot" style="width: 20px;"></i> AI & Prompts Settings
+            </a>
+            <a class="nav-link" onclick="switchTab('security', this)">
+                <i class="fa-solid fa-shield-halved" style="width: 20px;"></i> Security & Logs
+            </a>
 
-    <main class="dashboard-main" style="padding-top: 10px;">
-        <!-- Top Toolbar -->
-        <div class="builder-toolbar" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 24px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
-            <div style="display: flex; align-items: center; gap: 16px;">
-                <button class="btn-secondary" onclick="loadDemoData()" style="padding: 6px 12px; font-size: 13px;">
-                    <i class="fa-solid fa-magic"></i> Load Demo Data
-                </button>
-                <div class="ats-score" style="display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px;">
-                    <i class="fa-solid fa-chart-pie" style="color: var(--brand-blue);"></i> ATS Score: <span id="atsScoreValue" style="color: #10b981;">0%</span>
-                </div>
-                <div class="save-status" id="saveStatus" style="font-size: 12px; color: var(--text-muted);">
-                    <i class="fa-solid fa-cloud"></i> Auto-saved just now
-                </div>
-            </div>
-            <div style="display: flex; gap: 12px;">
-                <button class="btn-secondary" onclick="shareResume()" style="padding: 6px 12px; font-size: 13px;">
-                    <i class="fa-solid fa-link"></i> Share Link
-                </button>
-                <select id="exportFormat" class="btn-secondary" style="padding: 6px 12px; font-size: 13px; border: 1px solid var(--border-color); background: white;">
-                    <option value="pdf">PDF Format</option>
-                    <option value="json">JSON Backup</option>
-                    <option value="txt">Plain Text</option>
-                </select>
-                <button class="btn-primary" onclick="exportResume()" style="padding: 6px 16px; font-size: 13px; background: var(--brand-blue); color: white; border-radius: 6px;">
-                    <i class="fa-solid fa-download"></i> Export
-                </button>
-            </div>
-        </div>
+            <div style="flex-grow: 1;"></div>
+            <a class="nav-link" onclick="logoutAdmin()" style="color: #ef4444;">
+                <i class="fa-solid fa-arrow-right-from-bracket" style="width: 20px;"></i> Exit Admin
+            </a>
+        </aside>
 
-        <div class="dashboard-grid">
-            <!-- Left Side: Form Editor -->
-            <section class="card editor-card" style="padding: 24px; max-height: calc(100vh - 180px); overflow-y: auto;">
-                <h2 class="card-title" style="margin-bottom: 24px;">Resume Content</h2>
+        <!-- Main Content Area -->
+        <main class="admin-main">
+            
+            <!-- SECTION 1: DASHBOARD & ANALYTICS -->
+            <div id="dashboard" class="tab-content active">
+                <div class="header-area">
+                    <h2>Platform Analytics</h2>
+                    <span style="background: #e0e7ff; color: var(--brand-blue); padding: 4px 12px; border-radius: 12px; font-size: 13px; font-weight: 600;">System Healthy</span>
+                </div>
                 
-                <!-- Progress Bar -->
-                <div style="width: 100%; background: #f1f5f9; height: 6px; border-radius: 4px; margin-bottom: 24px;">
-                    <div id="builderProgress" style="width: 25%; height: 100%; background: var(--brand-blue); border-radius: 4px; transition: width 0.3s ease;"></div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <h3>Total Registered Users</h3>
+                            <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                        </div>
+                        <div class="value" id="statTotalUsers">1,251</div>
+                        <div class="stat-badge positive"><i class="fa-solid fa-arrow-trend-up"></i> +12% this week</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <h3>Resumes Generated</h3>
+                            <div class="stat-icon"><i class="fa-solid fa-file-contract"></i></div>
+                        </div>
+                        <div class="value highlight" id="statTotalResumes">5,492</div>
+                        <div class="stat-subtext">Across all templates</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <h3>PDF Downloads</h3>
+                            <div class="stat-icon"><i class="fa-solid fa-download"></i></div>
+                        </div>
+                        <div class="value">3,105</div>
+                        <div class="stat-subtext">Last 30 days</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <h3>Estimated Earnings</h3>
+                            <div class="stat-icon"><i class="fa-solid fa-sack-dollar"></i></div>
+                        </div>
+                        <div class="value">$240.50</div>
+                        <div class="stat-subtext">28,450 ad impressions</div>
+                    </div>
                 </div>
 
-                <form id="resumeForm">
-                    <!-- Personal Info -->
-                    <div class="editor-section" style="margin-bottom: 32px;">
-                        <h3 style="font-size: 16px; margin-bottom: 16px; display: flex; justify-content: space-between;">
-                            <span>Personal Information</span>
-                        </h3>
-                        <div class="form-group">
-                            <label>Full Name</label>
-                            <input type="text" id="r_name" oninput="updatePreview()" placeholder="e.g. Shayan Khan">
-                        </div>
-                        <div class="form-group row-split">
-                            <div>
-                                <label>Job Title</label>
-                                <input type="text" id="r_title" oninput="updatePreview()" placeholder="e.g. Software Engineer">
-                            </div>
-                            <div>
-                                <label>Email</label>
-                                <input type="email" id="r_email" oninput="updatePreview()" placeholder="e.g. shayan@example.com">
-                            </div>
-                        </div>
-                        <div class="form-group row-split">
-                            <div>
-                                <label>Phone</label>
-                                <input type="text" id="r_phone" oninput="updatePreview()" placeholder="e.g. +1 234 567 8900">
-                            </div>
-                            <div>
-                                <label>Location</label>
-                                <input type="text" id="r_location" oninput="updatePreview()" placeholder="e.g. San Francisco, CA">
-                            </div>
-                        </div>
+                <!-- API Meter & Charts -->
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3 style="margin-bottom: 16px; color: var(--text-secondary); font-size: 14px;">Daily Registration Growth</h3>
+                        <canvas id="growthChart" height="250"></canvas>
                     </div>
-
-                    <!-- Professional Summary -->
-                    <div class="editor-section" style="margin-bottom: 32px;">
-                        <h3 style="font-size: 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
-                            <span>Professional Summary</span>
-                            <button type="button" onclick="enhanceText('r_summary')" class="btn-sm" style="background: #e0e7ff; color: var(--brand-blue); border: none; cursor: pointer; border-radius: 4px; padding: 4px 8px; font-size: 11px;" title="Enhance grammar and tone with AI">
-                                <i class="fa-solid fa-wand-magic-sparkles"></i> AI Enhance
-                            </button>
-                        </h3>
-                        <div class="form-group">
-                            <textarea id="r_summary" oninput="updatePreview()" placeholder="Write a brief professional summary..." style="min-height: 100px;"></textarea>
-                        </div>
+                    <div class="chart-container">
+                        <h3 style="margin-bottom: 16px; color: var(--text-secondary); font-size: 14px;">Template Popularity</h3>
+                        <canvas id="templateChart" height="250"></canvas>
                     </div>
-
-                    <!-- Experience -->
-                    <div class="editor-section" style="margin-bottom: 32px;">
-                        <h3 style="font-size: 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
-                            <span>Experience</span>
-                            <button type="button" onclick="addExperience()" class="btn-sm" style="background: #f1f5f9; border: none; cursor: pointer; border-radius: 4px; padding: 4px 8px; font-size: 11px;">+ Add Role</button>
-                        </h3>
-                        <div id="experienceList">
-                            <!-- Drag and Drop Experience items generated here -->
-                        </div>
-                    </div>
-
-                    <!-- Education -->
-                    <div class="editor-section" style="margin-bottom: 32px;">
-                        <h3 style="font-size: 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
-                            <span>Education</span>
-                            <button type="button" onclick="addEducation()" class="btn-sm" style="background: #f1f5f9; border: none; cursor: pointer; border-radius: 4px; padding: 4px 8px; font-size: 11px;">+ Add School</button>
-                        </h3>
-                        <div id="educationList">
-                            <!-- Drag and Drop Education items generated here -->
-                        </div>
-                    </div>
-
-                    <!-- Skills -->
-                    <div class="editor-section" style="margin-bottom: 32px;">
-                        <h3 style="font-size: 16px; margin-bottom: 16px;">Skills</h3>
-                        <div class="form-group">
-                            <label>Technical Skills (comma separated)</label>
-                            <input type="text" id="r_skills" oninput="updatePreview()" placeholder="e.g. JavaScript, React, Node.js">
-                        </div>
-                        <div style="font-size: 12px; color: var(--text-muted);">* Skill level sliders and star ratings are auto-generated based on the template.</div>
-                    </div>
-                </form>
-            <!-- Right Side: Live Resume Preview -->
-            <section class="card preview-card" style="padding: 0; background: #e2e8f0; border: none; display: flex; justify-content: center; overflow-y: auto; max-height: calc(100vh - 180px);">
-                <div id="resumePreviewContainer" style="background: white; width: 210mm; min-height: 297mm; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 40px; margin: 24px; position: relative; color: var(--text-primary); font-family: 'Inter', sans-serif;">
-                    <!-- Real-time DOM representation of the resume goes here -->
                 </div>
-            </section>
-        </div>
-    </main>
+
+                <div class="stat-card" style="margin-bottom: 24px;">
+                    <h3 style="margin-bottom: 16px;">AI Usage Tracking (Gemini API)</h3>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; font-weight: 600;">
+                        <span>Token Quota Used</span>
+                        <span style="color: #f59e0b;">68%</span>
+                    </div>
+                    <div style="width: 100%; background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+                        <div style="width: 68%; background: #f59e0b; height: 100%;"></div>
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">Approx. 450,000 / 1,000,000 tokens utilized this billing cycle.</p>
+                </div>
+            </div>
+
+            <!-- SECTION 2: USER MANAGEMENT -->
+            <div id="users" class="tab-content">
+                <div class="header-area">
+                    <h2>User Directory</h2>
+                </div>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Signup Date</th>
+                            <th>Resumes</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- SECTION 3: TEMPLATES -->
+            <div id="templates" class="tab-content">
+                <div class="header-area">
+                    <h2>Template Manager</h2>
+                    <button class="btn-primary" onclick="openTemplateModal()">+ Upload New Template</button>
+                </div>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Preview</th>
+                            <th>Template Name</th>
+                            <th>Category & Tags</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="templateTableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- SECTION 4: MONETIZATION & ADS -->
+            <div id="monetization" class="tab-content">
+                <div class="header-area">
+                    <h2>Monetization & Ads</h2>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Est. Revenue (30d)</h3>
+                        <div class="value" style="color: #10b981;">$428.50</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Ad Impressions</h3>
+                        <div class="value">142K</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Avg. CTR</h3>
+                        <div class="value">1.2%</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>eCPM</h3>
+                        <div class="value">$3.02</div>
+                    </div>
+                </div>
+
+                <div class="charts-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="stat-card">
+                        <h3 style="margin-bottom: 16px; font-size: 16px; color: var(--text-primary);">Google AdSense Config</h3>
+                        <form id="adsenseForm" onsubmit="event.preventDefault(); saveMockSettings('AdSense Code Saved');">
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500;">
+                                    <input type="checkbox" checked> Enable Auto-Ads globally
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>Header Injection Script</label>
+                                <textarea style="height: 100px; font-family: monospace; font-size: 12px;" placeholder='<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>'></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary" style="padding: 8px 16px;">Save Script</button>
+                        </form>
+                    </div>
+
+                    <div class="stat-card">
+                        <h3 style="margin-bottom: 16px; font-size: 16px; color: var(--text-primary);">ads.txt Manager</h3>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Edit your site's root ads.txt file directly.</p>
+                        <form id="adsTxtForm" onsubmit="event.preventDefault(); saveAdsTxt();">
+                            <div class="form-group">
+                                <textarea id="adsTxtEditor" style="height: 120px; font-family: monospace; font-size: 12px; background: #1e293b; color: #f8fafc;" placeholder="google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0"></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary" style="padding: 8px 16px; background: #10b981;">Save ads.txt</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 5: AI SETTINGS -->
+            <div id="ai-settings" class="tab-content">
+                <div class="header-area">
+                    <h2>AI & Prompt Engineering</h2>
+                </div>
+
+                <div class="stat-card" style="margin-bottom: 24px;">
+                    <h3 style="margin-bottom: 16px; font-size: 16px; color: var(--text-primary);">API Keys Manager</h3>
+                    <form onsubmit="event.preventDefault(); saveMockSettings('API Keys Updated');">
+                        <div class="form-group row-split">
+                            <div>
+                                <label>Primary AI Model (Gemini)</label>
+                                <input type="password" value="************************" placeholder="Enter API Key">
+                            </div>
+                            <div>
+                                <label>Fallback AI Model (OpenAI)</label>
+                                <input type="password" placeholder="sk-proj-...">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary" style="padding: 8px 16px;">Update Keys</button>
+                    </form>
+                </div>
+
+                <div class="stat-card">
+                    <h3 style="margin-bottom: 16px; font-size: 16px; color: var(--text-primary);">System Prompt Customization</h3>
+                    <form onsubmit="event.preventDefault(); saveMockSettings('Prompts Saved successfully');">
+                        <div class="form-group">
+                            <label>Professional Summary Generator Prompt</label>
+                            <textarea style="height: 100px; font-size: 13px;">You are an expert ATS resume writer. Generate a concise, impactful 3-sentence professional summary based on the provided skills and job title.</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Bullet Point Enhancer Prompt</label>
+                            <textarea style="height: 100px; font-size: 13px;">Rewrite the following experience bullet point to use strong action verbs and highlight quantifiable metrics. Ensure it passes ATS filters for the target role.</textarea>
+                        </div>
+                        <button type="submit" class="btn-primary" style="padding: 8px 16px;">Save System Prompts</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- SECTION 6: SECURITY & LOGS -->
+            <div id="security" class="tab-content">
+                <div class="header-area">
+                    <h2>Security & Audit Logs</h2>
+                </div>
+
+                <div class="charts-grid" style="grid-template-columns: 1fr 2fr;">
+                    <div class="stat-card">
+                        <h3 style="margin-bottom: 16px; font-size: 16px; color: var(--text-primary);">Admin Credentials</h3>
+                        <form onsubmit="event.preventDefault(); saveMockSettings('Password updated in session');">
+                            <div class="form-group">
+                                <label>Update Email</label>
+                                <input type="email" value="shayanresumaker@gmail.com" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label>New Password</label>
+                                <input type="password" placeholder="Enter new password">
+                            </div>
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; margin-bottom: 16px;">
+                                <input type="checkbox"> Require 2FA on login
+                            </label>
+                            <button type="submit" class="btn-primary" style="padding: 8px 16px; width: 100%;">Update Security Profile</button>
+                        </form>
+                    </div>
+
+                    <div class="stat-card" style="padding: 0; overflow: hidden;">
+                        <h3 style="padding: 20px 24px 0 24px; font-size: 16px; color: var(--text-primary);">Recent Activity Audit</h3>
+                        <table class="admin-table" style="border: none; box-shadow: none;">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Event Type</th>
+                                    <th>Actor / Target</th>
+                                </tr>
+                            </thead>
+                            <tbody id="auditTableBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
 
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Template Selector Modal -->
-    <div class="template-modal" id="templateModal">
-        <div class="modal-content-wrapper">
-            <button class="modal-close-btn" onclick="closeTemplateModal()"><i class="fa-solid fa-xmark"></i></button>
-            
-            <div class="templates-header" style="margin-bottom: 32px;">
-                <h2 style="font-size: 28px;">Select a Template</h2>
-                <p>Choose a layout style for your next document generation.</p>
-            </div>
-            
-            <div class="template-grid">
-                <!-- Templates are injected here by templates.js -->
-            </div>
+    <!-- Template Modal -->
+    <div id="templateModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000;">
+        <div style="background: white; padding: 32px; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+            <h3 id="modalTitle" style="margin-bottom: 24px; color: #0F172A; font-size: 20px;">Upload New Template</h3>
+            <form id="tplForm" onsubmit="saveTemplate(event)">
+                <input type="hidden" id="modalTemplateId">
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #475569; font-size: 14px;">Template Name</label>
+                    <input type="text" id="tplName" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #475569; font-size: 14px;">Category</label>
+                    <select id="tplCategory" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
+                        <option value="Modern">Modern</option>
+                        <option value="Professional">Professional</option>
+                        <option value="Corporate">Corporate</option>
+                        <option value="Creative">Creative</option>
+                        <option value="Standard">Standard</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #475569; font-size: 14px;">Tags (comma separated)</label>
+                    <input type="text" id="tplTags" placeholder="e.g. ATS Friendly, Popular" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #475569; font-size: 14px;">Preview Image URL</label>
+                    <input type="text" id="tplImage" placeholder="e.g. assets/templates/new.png" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #475569; font-size: 14px;">CSS Layout Class / Style Structure</label>
+                    <textarea id="tplCss" rows="3" placeholder="Paste custom CSS or layout identifiers here..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; resize: vertical;"></textarea>
+                </div>
+                <div style="margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+                    <label style="font-weight: 500; color: #475569; font-size: 14px;">Status</label>
+                    <label class="switch" style="position:relative; display:inline-block; width:44px; height:24px;">
+                        <input type="checkbox" id="tplStatus" style="opacity:0; width:0; height:0;">
+                        <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#10b981; border-radius:34px; transition:.4s;"></span>
+                    </label>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                    <button type="button" onclick="closeTemplateModal()" style="padding: 10px 20px; border: 1px solid #cbd5e1; background: white; border-radius: 6px; cursor: pointer; font-weight: 500;">Cancel</button>
+                    <button type="submit" style="padding: 10px 20px; border: none; background: #0F172A; color: white; border-radius: 6px; cursor: pointer; font-weight: 500;">Save Template</button>
+                </div>
+            </form>
+            <script>
+                // Visual switch toggle
+                document.getElementById('tplStatus').addEventListener('change', function(e) {
+                    this.nextElementSibling.style.backgroundColor = this.checked ? '#10b981' : '#cbd5e1';
+                });
+            </script>
         </div>
     </div>
 
-    <script src="builder.js"></script>
-    <script src="templates.js"></script>
+    <!-- Scripts -->
+    <script src="js/db-schemas.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/admin-charts.js"></script>
 </body>
 </html>
