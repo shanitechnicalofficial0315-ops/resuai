@@ -3,77 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ResuAI Admin - Login</title>
-    <link rel="stylesheet" href="../style.css">
-    <script src="js/auth.js"></script>
-    <style>
-        .admin-login-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background: #f1f5f9;
-        }
-        .admin-login-card {
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-        .admin-logo {
-            font-size: 32px;
-            font-weight: 800;
-            color: var(--brand-blue);
-            margin-bottom: 24px;
-        }
-        .admin-login-card input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 16px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 14px;
-        }
-        .admin-login-card button {
-            width: 100%;
-            padding: 12px;
-            background: var(--brand-blue);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .admin-login-card button:hover {
-            background: var(--brand-blue-hover);
-        }
-        .error-msg {
-            color: #ef4444;
-            font-size: 13px;
-            margin-bottom: 16px;
-            display: none;
-        }
-    </style>
+    <meta name="description" content="Log in to ResuAI to generate AI-powered resumes and cover letters.">
+    <title>ResuAI — Login</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <div class="admin-login-wrapper">
-        <div class="admin-login-card">
-            <div class="admin-logo">ResuAI Admin</div>
-            <h2 style="font-size: 20px; margin-bottom: 24px; color: var(--text-primary);">Restricted Access</h2>
-            <div class="error-msg" id="errorMsg">Invalid credentials.</div>
-            <form id="adminLoginForm">
-                <input type="email" id="adminEmail" placeholder="Admin Email" required autocomplete="username" value="shayanresumaker@gmail.com">
-                <input type="password" id="adminPassword" placeholder="Password" required autocomplete="current-password" value="shayankhan@0333">
-                <button type="submit">Authenticate</button>
-            </form>
-            <div style="margin-top: 24px; font-size: 12px; color: var(--text-muted);">
-                <a href="../index.html" style="color: var(--brand-blue); text-decoration: none;">&larr; Back to main site</a>
+<body class="auth-page-wrapper">
+
+    <!-- Auth Card -->
+    <div class="auth-card">
+        <div class="auth-card-header">
+            <a href="index.html" class="auth-logo">
+                <div class="logo-icon">R</div>
+                <span class="logo-title">ResuAI</span>
+            </a>
+            <h1>Welcome back</h1>
+            <p>Sign in to your account to continue generating documents.</p>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" onsubmit="event.preventDefault(); handleLogin();">
+            <div class="form-group">
+                <label for="loginEmail">Email Address</label>
+                <div class="input-group">
+                    <span class="input-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                    </span>
+                    <input type="email" id="loginEmail" required placeholder="you@example.com" autocomplete="email">
+                </div>
             </div>
+
+            <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <div class="input-group">
+                    <span class="input-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                    </span>
+                    <input type="password" id="loginPassword" required placeholder="••••••••" autocomplete="current-password">
+                    <button type="button" class="password-toggle" onclick="togglePasswordVisibility('loginPassword', this)" aria-label="Toggle password">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Error message area -->
+            <div id="loginError" style="display:none; color: var(--text-danger); font-size: 13px; margin-bottom: 14px; padding: 10px 14px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: var(--radius-sm);"></div>
+
+            <button type="submit" class="btn-primary" id="btnLogin">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                    <polyline points="10 17 15 12 10 7"></polyline>
+                    <line x1="15" y1="12" x2="3" y2="12"></line>
+                </svg>
+                Sign In
+            </button>
+
+            <!-- Social Auth Divider -->
+            <div class="auth-divider">OR</div>
+
+            <!-- Social Login Buttons -->
+            <div class="social-auth-container">
+                <!-- Official Google Sign-In button will render here -->
+                <div id="googleSignInContainer" class="google-btn-container" style="width: 100%; min-height: 40px; display: flex; justify-content: center;"></div>
+                <button type="button" class="social-btn facebook-btn" onclick="handleFacebookLogin()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path fill="#ffffff" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                    Continue with Facebook
+                </button>
+            </div>
+        </form>
+
+        <div class="auth-footer-text">
+            Don't have an account? <a href="register.html">Create one free</a>
         </div>
     </div>
+
+    <!-- Footer link -->
+    <p style="font-size: 11px; color: var(--text-muted);">
+        &copy; 2026 ResuAI 
+    </p>
+
+    <!-- Toast -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="auth.js"></script>
+    <script>
+        // Apply saved theme preference
+        (function() {
+            if (localStorage.getItem("resuai_theme_preference") === "light") {
+                document.body.classList.add("light-theme");
+            }
+        })();
+
+        // If already logged in, go straight to app
+        if (getCurrentUser()) {
+            window.location.href = "./dashboard.html";
+        }
+
+        function handleLogin() {
+            const email    = document.getElementById("loginEmail").value;
+            const password = document.getElementById("loginPassword").value;
+            const errEl    = document.getElementById("loginError");
+            const btn      = document.getElementById("btnLogin");
+
+            btn.disabled = true;
+            btn.textContent = "Signing in...";
+            errEl.style.display = "none";
+
+            // Small delay for perceived responsiveness
+            setTimeout(() => {
+                const result = loginUser(email, password);
+                if (result.success) {
+                    if (result.isAdminRedirect) {
+                        showToast("Admin authenticated. Redirecting...", "success");
+                        setTimeout(() => window.location.href = "./admin/dashboard.html", 600);
+                    } else {
+                        showToast("Signed in successfully!", "success");
+                        setTimeout(() => window.location.href = "./dashboard.html", 600);
+                    }
+                } else {
+                    errEl.textContent = result.message;
+                    errEl.style.display = "block";
+                    btn.disabled = false;
+                    btn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                            <polyline points="10 17 15 12 10 7"></polyline>
+                            <line x1="15" y1="12" x2="3" y2="12"></line>
+                        </svg>
+                        Sign In`;
+                }
+            }, 300);
+        }
+
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const isText = input.type === "text";
+            input.type = isText ? "password" : "text";
+            btn.innerHTML = isText
+                ? `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`
+                : `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+        }
+
+        function showToast(message, type) {
+            const toast = document.createElement("div");
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-success)"><polyline points="20 6 9 17 4 12"></polyline></svg><span>${message}</span>`;
+            document.getElementById("toastContainer").appendChild(toast);
+            setTimeout(() => { toast.style.opacity = "0"; toast.style.transform = "translateY(-20px)"; toast.style.transition = "all 0.3s"; setTimeout(() => toast.remove(), 300); }, 2500);
+        }
+    </script>
 </body>
 </html>
